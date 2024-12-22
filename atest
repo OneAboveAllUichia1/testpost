@@ -1,0 +1,716 @@
+
+getgenv().Username = '' -- Account that will receive huge and snowflakes gift
+getgenv().AutoMail = false -- Only mail Huge and Snowflakes gift
+
+
+if not game:IsLoaded() then
+	game.Loaded:Wait()
+end
+
+--[[
+Main Variable
+--]]
+
+
+function AutoMailThing()
+    while wait(1) do
+        local save = require(game.ReplicatedStorage.Library.Client.Save).Get()
+            
+        if save and save.Inventory then
+
+            for n, i in pairs(save.Inventory.Lootbox or {}) do
+                if i.id:match('Snowflake') and i._am and i._am >= 25 then
+                    local args = {
+                            getgenv().Username,
+                            "Vintu",
+                            "Lootbox",
+                            tostring(n),
+                            i._am
+                    }
+                    local success, err = pcall(function()
+                        game:GetService("ReplicatedStorage").Network["Mailbox: Send"]:InvokeServer(unpack(args))
+                    end)
+                    if success then
+
+                    else
+
+                    end
+                end
+            end
+
+
+            for key, pet in pairs(save.Inventory.Pet or {}) do
+                if pet.id:match('Huge') then
+
+                    local args = {
+                            getgenv().Username,
+                            "Vintu",
+                            "Pet",
+                            tostring(key),
+                            1
+                    }
+                    local success, err = pcall(function()
+                        game:GetService("ReplicatedStorage").Network["Mailbox: Send"]:InvokeServer(unpack(args))
+                    end)
+                    if success then
+
+                    else
+
+                    end
+                end
+            end
+        else
+
+        end
+    end
+end
+
+if getgenv().AutoMail then 
+    task.spawn(AutoMailThing)
+end
+
+
+EggTotal = require(game.ReplicatedStorage.Library.Client.Save).Get()
+
+function AreaNumber()
+    return require(game:GetService("ReplicatedStorage").Library.Client.InstanceZoneCmds).GetMaximumOwnedZoneNumber()
+end
+
+function MaxHatchCount()
+    return require(game:GetService("ReplicatedStorage").Library.Client.EggCmds):GetMaxHatch()
+end
+
+function GetSave()
+    return require(game.ReplicatedStorage.Library.Client.Save).Get()
+end
+
+
+--[[
+Misc Function
+--]]
+
+spawn(function()
+    while task.wait(1) do
+       if getgenv().MailBox then
+           local save = require(game.ReplicatedStorage.Library.Client.Save).Get()
+           if save and save.Inventory and save.Inventory.Pet then
+               for key, pet in pairs(save.Inventory.Pet) do
+                   if pet.id:match('Huge') then
+                       print("Sending huge pet to: " .. tostring(getgenv().Username))
+                       local args = {
+                           [1] = getgenv().Username,
+                           [2] = "VintuHub",
+                           [3] = "Pet",
+                           [4] = tostring(key),
+                           [5] = 1
+                       }
+                       game:GetService("ReplicatedStorage").Network:FindFirstChild("Mailbox: Send"):InvokeServer(unpack(args))
+                   end
+               end
+           else
+               warn("Failed to retrieve save data or inventory.")
+           end
+       end
+    end
+end)
+
+function collectOrbs()
+    workspace.__THINGS.Orbs.ChildAdded:Connect(function(child)
+        if child and child.Parent then
+            local args = {
+                [1] = {
+                    [1] = child.Name
+                }
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Orbs: Collect"):FireServer(unpack(args))
+            task.wait(0.5)
+            child:Destroy()
+        end
+    end)
+end
+
+function DisableEggAnim()
+    while wait(0.2) do
+        if game:GetService("Players").LocalPlayer.PlayerScripts.Scripts.Game["Egg Opening Frontend"].Disabled ~= True then
+            game:GetService("Players").LocalPlayer.PlayerScripts.Scripts.Game["Egg Opening Frontend"].Enabled = True
+        end
+    end
+end 
+
+task.spawn(DisableEggAnim)
+
+
+function processPets(petCondition, machineName, serverFunction, amount)
+    local save = require(game.ReplicatedStorage.Library.Client.Save).Get()
+    if save and save.Inventory and save.Inventory.Pet then
+        for key, pet in pairs(save.Inventory.Pet) do
+            if pet._am and pet._am > petCondition then
+                local args = { tostring(key), amount }
+                game:GetService("ReplicatedStorage").Network[serverFunction]:InvokeServer(unpack(args))
+            end
+        end
+    end
+end
+
+--[[
+Not made by me
+--]]
+
+function CreateGuiAndUpdateANDfpsBoost()
+
+    local decalsyeeted = true
+    local g = game
+    local w = g.Workspace
+    local l = g.Lighting
+    local t = w.Terrain
+    sethiddenproperty(t,"Decoration",false)
+    t.WaterWaveSize = 0
+    t.WaterWaveSpeed = 0
+    t.WaterReflectance = 0
+    t.WaterTransparency = 0
+    l.GlobalShadows = 0
+    l.FogEnd = 9e9
+    l.Brightness = 0
+    settings().Rendering.QualityLevel = "Level01"
+    for i, v in pairs(w:GetDescendants()) do
+        if v:IsA("BasePart") and not v:IsA("MeshPart") then
+            v.Material = "Plastic"
+            v.Reflectance = 0
+        elseif (v:IsA("Decal") or v:IsA("Texture")) and decalsyeeted then
+            v.Transparency = 1
+        elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+            v.Lifetime = NumberRange.new(0)
+        elseif v:IsA("Explosion") then
+            v.BlastPressure = 1
+            v.BlastRadius = 1
+        elseif v:IsA("Fire") or v:IsA("SpotLight") or v:IsA("Smoke") or v:IsA("Sparkles") then
+            v.Enabled = false
+        elseif v:IsA("MeshPart") and decalsyeeted then
+            v.Material = "Plastic"
+            v.Reflectance = 0
+            v.TextureID = 10385902758728957
+        elseif v:IsA("SpecialMesh") and decalsyeeted  then
+            v.TextureId=0
+        elseif v:IsA("ShirtGraphic") and decalsyeeted then
+            v.Graphic=0
+        elseif (v:IsA("Shirt") or v:IsA("Pants")) and decalsyeeted then
+            v[v.ClassName.."Template"]=0
+        end
+    end
+    for i = 1,#l:GetChildren() do
+        e=l:GetChildren()[i]
+        if e:IsA("BlurEffect") or e:IsA("SunRaysEffect") or e:IsA("ColorCorrectionEffect") or e:IsA("BloomEffect") or e:IsA("DepthOfFieldEffect") then
+            e.Enabled = false
+        end
+    end
+    w.DescendantAdded:Connect(function(v)
+        wait()--prevent errors and shit
+    if v:IsA("BasePart") and not v:IsA("MeshPart") then
+            v.Material = "Plastic"
+            v.Reflectance = 0
+        elseif v:IsA("Decal") or v:IsA("Texture") and decalsyeeted then
+            v.Transparency = 1
+        elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+            v.Lifetime = NumberRange.new(0)
+        elseif v:IsA("Explosion") then
+            v.BlastPressure = 1
+            v.BlastRadius = 1
+        elseif v:IsA("Fire") or v:IsA("SpotLight") or v:IsA("Smoke") or v:IsA("Sparkles") then
+            v.Enabled = false
+        elseif v:IsA("MeshPart") and decalsyeeted then
+            v.Material = "Plastic"
+            v.Reflectance = 0
+            v.TextureID = 10385902758728957
+        elseif v:IsA("SpecialMesh") and decalsyeeted then
+            v.TextureId=0
+        elseif v:IsA("ShirtGraphic") and decalsyeeted then
+            v.ShirtGraphic=0
+        elseif (v:IsA("Shirt") or v:IsA("Pants")) and decalsyeeted then
+            v[v.ClassName.."Template"]=0
+        end
+    end)
+
+    local function FormatNumber(number)
+        if number >= 1e6 then
+            return string.format("%.2fM", number / 1e6) -- Format as millions
+        elseif number >= 1e3 then
+            return string.format("%.2fK", number / 1e3) -- Format as thousands
+        else
+            return tostring(number) -- No formatting for smaller numbers
+        end
+    end
+    
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Parent = game:GetService("CoreGui")
+    screenGui.IgnoreGuiInset = true
+    screenGui.DisplayOrder = 9999
+    
+    local blackFrame = Instance.new("Frame")
+    blackFrame.Parent = screenGui
+    blackFrame.Size = UDim2.new(1, 0, 1, 0) 
+    blackFrame.Position = UDim2.new(0, 0, 0, 0)  
+    blackFrame.BackgroundColor3 = Color3.fromRGB(3, 3, 3)  
+    blackFrame.BackgroundTransparency = 0
+    blackFrame.ZIndex = 1
+    
+    local imageLabel = Instance.new("ImageLabel")
+    imageLabel.Parent = blackFrame
+    imageLabel.Size = UDim2.new(0.3, 0, 0.3, 0)  
+    imageLabel.Position = UDim2.new(0.5, 0, 0, 0)  
+    imageLabel.AnchorPoint = Vector2.new(0.5, 0)  
+    imageLabel.Image = "rbxassetid://136624142734378"
+    imageLabel.BackgroundTransparency = 1
+    imageLabel.ScaleType = Enum.ScaleType.Fit
+    
+    local uicorner = Instance.new("UICorner")
+    uicorner.Parent = imageLabel
+    uicorner.CornerRadius = UDim.new(10, 0)  
+    
+    local accountLabel = Instance.new("TextLabel")
+    accountLabel.Parent = blackFrame
+    accountLabel.Size = UDim2.new(0.3, 0, 0.05, 0)
+    accountLabel.Position = UDim2.new(0.5, 0.5, 0.3, 0)
+    accountLabel.AnchorPoint = Vector2.new(0.5, 0)
+    accountLabel.Text = " 👤 Account: " .. game.Players.LocalPlayer.Name
+    accountLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    accountLabel.TextScaled = true
+    accountLabel.Font = Enum.Font.SourceSansBold
+    accountLabel.BackgroundTransparency = 1
+    accountLabel.ZIndex = 3
+    
+    local TotalEgg = Instance.new("TextLabel")
+    TotalEgg.Parent = blackFrame
+    TotalEgg.Size = UDim2.new(0.3, 0, 0.05, 0)
+    TotalEgg.Position = UDim2.new(0.5, 0.5, 0.4, 0)
+    TotalEgg.AnchorPoint = Vector2.new(0.5, 0)
+    TotalEgg.Text = "🥚 Total Egg Hatched: "
+    TotalEgg.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TotalEgg.TextScaled = true
+    TotalEgg.Font = Enum.Font.SourceSansBold
+    TotalEgg.BackgroundTransparency = 1
+    TotalEgg.ZIndex = 3
+    
+    local TotalEggHatchedThisSession = Instance.new("TextLabel")
+    TotalEggHatchedThisSession.Parent = blackFrame
+    TotalEggHatchedThisSession.Size = UDim2.new(0.3, 0, 0.05, 0)
+    TotalEggHatchedThisSession.Position = UDim2.new(0.5, 0.5, 0.5, 0)
+    TotalEggHatchedThisSession.AnchorPoint = Vector2.new(0.5, 0)
+    TotalEggHatchedThisSession.Text = "🥚 Total Eggs Hatched This Session: "
+    TotalEggHatchedThisSession.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TotalEggHatchedThisSession.TextScaled = true
+    TotalEggHatchedThisSession.Font = Enum.Font.SourceSansBold
+    TotalEggHatchedThisSession.BackgroundTransparency = 1
+    TotalEggHatchedThisSession.ZIndex = 3
+    
+    local timeLabel = Instance.new("TextLabel")
+    timeLabel.Parent = blackFrame
+    timeLabel.Size = UDim2.new(0.3, 0, 0.05, 0)
+    timeLabel.Position = UDim2.new(0.5, 0, 0.6, 0)
+    timeLabel.AnchorPoint = Vector2.new(0.5, 0)
+    timeLabel.Text = "⏳ Uptime: 00:00:00 "
+    timeLabel.TextColor3 = Color3.new(1, 1, 1)
+    timeLabel.TextScaled = true
+    timeLabel.Font = Enum.Font.SourceSansBold
+    timeLabel.BackgroundTransparency = 1
+    timeLabel.ZIndex = 3
+    
+    function UpdateTimeLabel()
+        local sec = 0
+        while true do
+            sec += 1
+            timeLabel.Text = string.format("⏳Uptime:  %02d:%02d:%02d ", math.floor(sec / 3600), math.floor(sec / 60) % 60, sec % 60)
+            task.wait(1)
+        end
+    end
+    
+    task.spawn(UpdateTimeLabel)
+    
+    function UpdateTotalEggAndThisSessionEgg()
+        local totalEGG = EggTotal.EggsHatched or 0
+        while task.wait(1) do
+            local totalEggsHatchedInLife = EggTotal.EggsHatched or 0
+            local eggsHatchedThisSession = EggTotal.EggsHatched - totalEGG
+            TotalEgg.Text = "🥚 Total Egg Hatched: " .. FormatNumber(totalEggsHatchedInLife)
+            TotalEggHatchedThisSession.Text = "🥚 Total Eggs Hatched This Session: " .. FormatNumber(eggsHatchedThisSession)
+        end
+    end
+    
+    task.spawn(UpdateTotalEggAndThisSessionEgg)
+end
+
+--[[
+Main Function
+--]]
+
+function GetBossChestStatus()
+    Part = workspace.__DEBRIS:GetChildren()
+
+    for _, Parts in pairs(Part) do
+       if Parts:FindFirstChild('ChestTimer') and Parts:FindFirstChild('ChestTimer'):FindFirstChild('Title') and Parts.ChestTimer.Timer.Text == "00:00" then
+          return true
+       end
+    end
+end
+
+function AutoSendInGift()
+    local save = require(game.ReplicatedStorage.Library.Client.Save).Get()
+    for n, i in pairs(save.Inventory.Misc) do 
+        if i.id:match('Mega') and i.id:match('Gingerbread') then 
+           local args = {
+             {
+                 [tostring(n)] = 1
+             }
+           }
+           game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Mega Present: Submit"):InvokeServer(unpack(args))
+           wait(0.5)
+           game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Mega Present: Open"):InvokeServer()
+        end
+    end      
+    if save and save.Inventory and save.Inventory.Pet then
+        for key, pet in pairs(save.Inventory.Pet) do
+            if pet.id and (pet.id:match('Octopus') or pet.id:match('Icy Phoenix')) then
+                petamount = pet._am or 1
+                local args = {
+                    {
+                        [tostring(key)] = tonumber(petamount)
+                    }
+                }
+                game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Mega Present: Submit"):InvokeServer(unpack(args))
+                wait(0.5)
+                game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Mega Present: Open"):InvokeServer()
+            end
+        end
+    end
+end
+
+function BuyUpgrade()
+    for number = 1,5 do
+        local args = {
+            [1] = "MegaPresentMoreLoot"
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("EventUpgrades: Purchase"):InvokeServer(unpack(args))
+        local args = {
+            [1] = "MegaPresentEggLuckBoost"
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("EventUpgrades: Purchase"):InvokeServer(unpack(args))
+    end
+end 
+
+getgenv().count = 0
+getgenv().count2 = 0
+function DoInstanceQuest(CurrentArea)
+    game:GetService("Players").LocalPlayer.PlayerGui._MACHINES.MegaPresentUpgradeMachine:FindFirstChild('Frame').Visible = false
+    game:GetService("Players").LocalPlayer.PlayerGui._MACHINES.SnowMachine:FindFirstChild('Frame').Visible = false
+    if workspace.__THINGS.__INSTANCE_CONTAINER.Active:FindFirstChild('HolidayEvent') then 
+        local Gates = workspace.__THINGS.__INSTANCE_CONTAINER.Active.HolidayEvent.Gates:GetChildren()
+        local AreaFarmZone = {
+            [1] = {781, 16, -20876},
+            [2] = {942, 16, -20875},
+            [3] = {1111, 16, -20874},
+            [4] = {1264, 16, -20875},
+            [5] = {1427, 16, -20876},
+            [6] = {1784, 16, -20872},
+            [7] = {1947, 16, -20875},
+            [8] = {2129, 16, -20877},
+			[9] = {2287, 16, -20877},
+			[10] = {2452, 16, -20877},
+			[11] = {2609, 16, -20877}
+        }
+
+        if CurrentArea == 11 then
+            local cooldownText = workspace.__THINGS.Instances.SnowstormSurvival.Teleports.Enter.PortalBillboard.Label.Text
+            if cooldownText:match('Cooldown:') then
+                if GetBossChestStatus() then
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(1263, 20, -20775)
+                else
+                    for thing, k in pairs(GetSave().Inventory.Misc) do
+                        for u, i in pairs(k) do
+                            if k.id and k._am and k.id == "Snowflake" and k._am >= 10 then
+                                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = workspace.__THINGS.__INSTANCE_CONTAINER.Active.HolidayEvent.INTERACT.Machines.SnowMachine.Pad.CFrame
+                                wait(1)
+                                for number = 1,5 do 
+                                    wait(0.4)
+                                    local args = {
+                                        [1] = 10
+                                    }
+                                    
+                                    game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("SnowMachine_Activate"):InvokeServer(unpack(args))                            
+                                end
+                            end
+                        end
+                    end
+                    getgenv().count = getgenv().count + 1
+                    getgenv().count2 = getgenv().count2 + 1
+                    if getgenv().count >= 50 then
+                        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = workspace.__THINGS.__INSTANCE_CONTAINER.Active.HolidayEvent.INTERACT.Machines.MegaPresentUpgradeMachine.Pad.CFrame
+                        
+                        wait(0.5)
+
+                        BuyUpgrade()
+                        
+                        wait(0.5)
+                        getgenv().count = 0
+                        wait(0.5)
+                    else
+                        if getgenv().count2 >= 70 then
+                            AutoSendInGift()
+                            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = workspace.__THINGS.__INSTANCE_CONTAINER.Active.HolidayEvent.INTERACT.Machines.MegaPresentChoice.Pad.CFrame
+                            wait(1)
+                            wait(2)
+                            getgenv().count2 = 0
+                        else
+                            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(unpack(AreaFarmZone[CurrentArea]))
+                            
+                            while task.wait() do
+                            local Eggs = workspace.__THINGS.CustomEggs:GetChildren()
+                            for _, Egg in pairs(Eggs) do
+                                if Egg:FindFirstChild('PriceHUD') and Egg:FindFirstChild('PriceHUD'):FindFirstChild('PriceHUD') and Egg.PriceHUD.PriceHUD["Holiday Coins"].Amount.Text == "1.2b" or Egg:FindFirstChild('PriceHUD') and Egg:FindFirstChild('PriceHUD'):FindFirstChild('PriceHUD') and Egg.PriceHUD.PriceHUD["Holiday Coins"].Amount.Text == "110b" then
+
+                                    local args = {
+                                        [1] = Egg.Name,
+                                        [2] = tonumber(MaxHatchCount())
+                                    }
+                                    game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("CustomEggs_Hatch"):InvokeServer(unpack(args))
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            else
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = workspace.__THINGS.Instances.SnowstormSurvival.Teleports.Enter.CFrame
+            end
+        else
+            local NextArea = CurrentArea + 1
+            game:GetService("ReplicatedStorage").Network.InstanceZones_RequestPurchase:InvokeServer("HolidayEvent", NextArea)
+            
+            for _, Gate in pairs(Gates) do
+                if Gate:FindFirstChild('GateHUD') and Gate.GateHUD.Title.Text == 'Area ' .. NextArea then
+                    print(Gate.GateHUD.Title.Text)
+                    if Gate.GateHUD.Quest.Title.Text:match('Make') and Gate.GateHUD.Quest.Title.Text:match('golden') then
+                        local NumberOfGoldToDo = tonumber(string.gsub(Gate.GateHUD.Quest.Title.Text, "%D", ""))
+                        local NumberOfGoldNeeded = NumberOfGoldToDo * 10
+                        processPets(NumberOfGoldNeeded, "GoldMachine", "GoldMachine_Activate", NumberOfGoldToDo)
+                    elseif Gate.GateHUD.Quest.Title.Text:match('Make') and Gate.GateHUD.Quest.Title.Text:match('rainbow') then
+                        local NumberOfRainbowToDo = tonumber(string.gsub(Gate.GateHUD.Quest.Title.Text, "%D", ""))
+                        local NumberOfRainbowNeeded = NumberOfRainbowToDo * 10
+                        processPets(NumberOfRainbowNeeded, "RainbowMachine", "RainbowMachine_Activate", NumberOfRainbowToDo)
+                    elseif Gate.GateHUD.Quest.Title.Text:match('Break') then
+                        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(unpack(AreaFarmZone[CurrentArea]))
+                    end
+                end
+            end
+        end
+    elseif workspace.__THINGS.__INSTANCE_CONTAINER.Active:FindFirstChild('SnowstormSurvival') then 
+        BreakTree()
+    end
+end
+
+
+function GetInsideInstance()
+    while wait(0.5) do
+        MainMapPart = workspace:FindFirstChild('Map')
+        TouchInterestPart = workspace.__THINGS.Instances.HolidayEvent.Teleports:FindFirstChild('Enter')
+        Humanoid = game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart')
+        if MainMapPart then
+            if TouchInterestPart then 
+               if Humanoid then
+                    firetouchinterest(TouchInterestPart, game.Players.LocalPlayer.Character.HumanoidRootPart, 0)
+                    firetouchinterest(TouchInterestPart, game.Players.LocalPlayer.Character.HumanoidRootPart, 1)
+                end
+            end
+        else
+            DoInstanceQuest(AreaNumber())
+        end
+    end
+end
+
+function Refill()
+    for number = 1, 5 do
+        wait(0.5)
+        local args = {
+            [1] = "SnowstormSurvival",
+            [2] = "RequestFeedFire"
+        }
+
+        game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Instancing_FireCustomFromClient"):FireServer(unpack(args))
+    end
+end
+
+function BreakTree()
+    if workspace.__THINGS.__INSTANCE_CONTAINER.Active:FindFirstChild('SnowstormSurvival') then 
+        for number = 1,5 do
+            local args = {
+                [1] = "SnowstormSurvival",
+                [2] = "ClaimAxe"
+            }
+            game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Instancing_FireCustomFromClient"):FireServer(unpack(args))
+
+        end
+        
+        local Trees = workspace.__THINGS.__INSTANCE_CONTAINER.Active.SnowstormSurvival.Important.Trees:GetChildren()
+
+        if workspace.__THINGS.__INSTANCE_CONTAINER.Active.SnowstormSurvival.InstanceModels.Campfire.FireAmbiencePart:FindFirstChild('CampfireHealth') and tonumber((workspace.__THINGS.__INSTANCE_CONTAINER.Active.SnowstormSurvival.InstanceModels.Campfire.FireAmbiencePart.CampfireHealth.Progress.ProgressText.Text:gsub('%D', ''))) > 50 then
+            Egg = workspace.__THINGS.CustomEggs:GetChildren()
+            
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-987, 113, -20797)
+            Refill()
+            for _, Eggs in pairs(Egg) do
+                if Eggs:FindFirstChild('PriceHUD') and Eggs:FindFirstChild('PriceHUD'):FindFirstChild('PriceHUD') and Eggs:FindFirstChild('PriceHUD'):FindFirstChild('PriceHUD'):FindFirstChild('Logs'):FindFirstChild('Amount').Text == "FREE!" and Eggs:FindFirstChild('Egg') and Eggs:FindFirstChild('Egg'):FindFirstChild('EggInfo') then 
+                    local args = {
+                        [1] = Eggs.Name,
+                        [2] = tonumber(MaxHatchCount())
+                    }
+
+                    game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("CustomEggs_Hatch"):InvokeServer(unpack(args))
+                end
+            end
+        else
+            for _, Tree in pairs(Trees) do
+                local Trunk = Tree:FindFirstChild('Trunk')
+                if Trunk then
+                    local UID = Trunk:GetAttribute('UID')
+                    if UID then
+                        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = Trunk.CFrame
+                        for number = 1, 7 do
+                            wait(1)
+                            local args = {
+                                [1] = "SnowstormSurvival",
+                                [2] = "ChopTree",
+                                [3] = tostring(UID)
+                            }
+                            game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Instancing_FireCustomFromClient"):FireServer(unpack(args))
+                        end
+                        Refill()
+                    else
+                        warn("Tree trunk does not have a 'UID' attribute.")
+                    end
+                else
+                    warn("Tree does not have a 'Trunk' part.")
+                end
+            end
+            Refill()
+        end   
+    end 
+end
+
+local function SantaGifts()
+    for _, part in ipairs(workspace:GetChildren()) do
+
+        if part:IsA("BasePart") then
+
+            local args = {
+                [1] = part.Name
+            }
+
+            game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Christmas Sleigh: Claim"):InvokeServer(unpack(args))
+            task.wait(0.1)
+        end
+    end
+end
+
+local function CleanUp()
+    local players = game:GetService("Players")
+    local localPlayer = players.LocalPlayer
+
+    for _, player in ipairs(players:GetPlayers()) do
+        if player ~= localPlayer then
+            player:Destroy()
+        end
+    end
+
+    local success, errorMsg = pcall(function()
+        local coreGui = game:GetService("CoreGui")
+        local topBarApp = coreGui:FindFirstChild("TopBarApp", true)
+        if topBarApp then
+            topBarApp:Destroy()
+        end
+    end)
+end
+
+local function FreeForeversPack()
+    local args = {
+        [1] = "Default"
+    }
+    
+    game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("ForeverPacks: Claim Free"):InvokeServer(unpack(args))
+end    
+
+
+local function getRandomLookDirection()
+
+    local randomX = math.random(-100, 100) 
+    local randomY = math.random(5, 50)     
+    local randomZ = math.random(-100, 100)  
+
+    return Vector3.new(randomX, randomY, randomZ)  
+end
+
+function AntiAfk()
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            obj.Transparency = 1
+        end
+    end
+    
+    workspace.DescendantAdded:Connect(function(obj)
+        if obj:IsA("BasePart") then
+            obj.Transparency = 1
+        end
+    end)
+
+    game.Players.LocalPlayer.PlayerScripts.Scripts.Core["Idle Tracking"].Disabled = true
+
+    game.Players.LocalPlayer.PlayerScripts.Scripts.Core["Server Closing"].Disabled = true
+    while wait(math.random(1, 2)) do
+        local camera = game.Workspace.CurrentCamera
+        local originalPosition = camera.CFrame.Position 
+
+        local randomDirection = getRandomLookDirection()
+
+        local newCFrame = CFrame.new(originalPosition, randomDirection)
+
+        local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out, 0, false)
+        local goal = {CFrame = newCFrame}
+        local tween = game:GetService("TweenService"):Create(camera, tweenInfo, goal)
+        tween:Play()
+
+        tween.Completed:Wait()
+
+        wait(math.random(1, 5))
+
+        game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Hoverboard_RequestEquip"):FireServer()
+
+        wait(math.random(2, 7))  
+
+        game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Hoverboard_RequestUnequip"):FireServer()
+
+        wait(math.random(1, 5)) 
+        game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Index: Request Hatch Count"):InvokeServer()
+        wait(math.random(1,5))
+        game:GetService("ReplicatedStorage").Network["Idle Tracking: Stop Timer"]:FireServer()
+
+    end
+end
+
+function GotoWorld1()
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local World1Teleport = ReplicatedStorage.Network.World1Teleport
+    local result = game:GetService("ReplicatedStorage").Network.World1Teleport:InvokeServer()
+end
+
+--[[
+Launch Function Loop
+--]]
+
+task.spawn(collectOrbs)
+task.spawn(GetInsideInstance)
+task.spawn(AntiAfk)
+task.spawn(CleanUp)
+task.spawn(FreeForeversPack)
+task.spawn(CreateGuiAndUpdateANDfpsBoost)
+task.spawn(GotoWorld1)
+task.spawn(SantaGifts)
